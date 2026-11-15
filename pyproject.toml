@@ -1,0 +1,89 @@
+[project]
+name = "cad-and-3d-printing-skills"
+version = "0.2.0"
+description = "Agent skills, instructions and tooling for AI-assisted CAD design for FDM 3D printing."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11,<3.14"
+# Skill scripts are standalone: each declares its own dependencies inline (PEP 723) and runs
+# with `uv run <script>`. This project only pins the development and test environment.
+dependencies = []
+
+[dependency-groups]
+# Union of all skill-script dependencies (tools/validate_repo.py keeps this in sync).
+cad = [
+    "build123d>=0.9",
+    "ezdxf>=1.1",
+    "manifold3d>=3.0",
+    "networkx>=3.0",
+    "numpy>=1.26",
+    "opencv-python-headless>=4.8",
+    "pillow>=10.0",
+    "potracer>=0.0.4",
+    "rtree>=1.0",
+    "scipy>=1.11",
+    "trimesh>=4.0",
+    "vtk>=9.3",
+]
+dev = [
+    { include-group = "cad" },
+    "mypy>=1.11",
+    "pyyaml>=6.0",
+    "types-pyyaml>=6.0",
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+extend-include = ["*.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "PL", "N", "C4", "PTH", "RET", "ARG"]
+ignore = [
+    "PLR0913",  # CLI-style functions legitimately take many parameters
+    "PLR0915",
+    "PLR2004",  # geometry code is full of meaningful literal thresholds
+    "N806",     # math-style variable names (R, X) are clearer in geometry code
+    "RUF001", "RUF002", "RUF003",  # allow unicode symbols (°, ×, Ø) in docs
+    "PLC0415",  # optional heavy dependencies (build123d for STEP input) are imported lazily on purpose
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["PLR2004", "S101", "ARG001"]
+
+[tool.mypy]
+python_version = "3.11"
+files = [".github/skills", "tools", "tests"]
+explicit_package_bases = true
+ignore_missing_imports = true
+disallow_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests"]
+addopts = "-ra --strict-markers --import-mode=importlib"
+filterwarnings = ["error::pytest.PytestUnraisableExceptionWarning"]
+
+[tool.coverage.run]
+source = [".github/skills", "tools"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
+skip_covered = true
+exclude_also = ['if __name__ == "__main__":']

@@ -1,0 +1,20 @@
+name: Skill proposal
+description: Propose a new skill or a change to an existing one
+labels: [skill]
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: What should the agent be able to do? Name it for the outcome, not the tool.
+    validations: { required: true }
+  - type: textarea
+    id: trigger
+    attributes:
+      label: When should it load?
+      description: Draft the "Use when ..." part of the description.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Sources for every number or rule (datasheets, docs, measured results).

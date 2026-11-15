@@ -1,0 +1,11 @@
+{
+	"$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+	"name": "cad-and-3d-printing-skills",
+	"version": "0.2.0",
+	"description": "Agent skills for AI-assisted CAD design for FDM 3D printing: spec-first workflow, Fusion and build123d modelling, verification-first geometry checks, scan-to-sketch, surface detail, export validation and print diagnosis.",
+	"author": { "name": "Fabian Schurig", "url": "https://github.com/FabianSchurig" },
+	"homepage": "https://github.com/FabianSchurig/cad-and-3d-printing-skills",
+	"repository": "https://github.com/FabianSchurig/cad-and-3d-printing-skills",
+	"license": "MIT",
+	"keywords": ["cad", "3d-printing", "fdm", "autodesk-fusion", "build123d", "agent-skills", "mcp"]
+}

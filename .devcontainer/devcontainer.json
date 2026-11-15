@@ -1,0 +1,27 @@
+{
+	"name": "cad-and-3d-printing",
+	"build": { "dockerfile": "Dockerfile" },
+	// Host networking lets the container reach a CAD MCP server on the host's 127.0.0.1
+	// (e.g. Autodesk Fusion on Windows through WSL2 mirrored networking).
+	"runArgs": ["--network=host"],
+	"remoteUser": "vscode",
+	// The CLI remaps the vscode UID to the host UID after the build, so take ownership here.
+	"postCreateCommand": "sudo chown \"$(id -u):$(id -g)\" /opt/venv && uv sync --locked",
+	"containerEnv": { "VIRTUAL_ENV": "/opt/venv" },
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"python.defaultInterpreterPath": "/opt/venv/bin/python",
+				"python.testing.pytestEnabled": true
+			},
+			"extensions": [
+				"ms-python.python",
+				"charliermarsh.ruff",
+				"ms-python.mypy-type-checker",
+				"bernhard-42.ocp-cad-viewer",
+				"bierner.markdown-mermaid",
+				"GitHub.copilot-chat"
+			]
+		}
+	}
+}

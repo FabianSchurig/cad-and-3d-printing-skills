@@ -1,0 +1,20 @@
+name: Bug report
+description: A script, check or skill gives a wrong result
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened and what did you expect?
+    validations: { required: true }
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: Command line and a minimal, shareable input (a generated test part is ideal; never share private designs).
+    validations: { required: true }
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: "OS, Python version, uv version, CAD tool (Fusion / build123d), printer"

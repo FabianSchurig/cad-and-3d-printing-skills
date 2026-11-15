@@ -1,0 +1,15 @@
+{
+	"name": "cad-and-3d-printing",
+	"owner": { "name": "Fabian Schurig", "url": "https://github.com/FabianSchurig" },
+	"metadata": { "description": "Agent skills for AI-assisted CAD design for 3D printing." },
+	"plugins": [
+		{
+			"name": "cad-and-3d-printing-skills",
+			"source": ".github",
+			"version": "0.2.0",
+			"description": "Spec-first CAD workflow, Fusion and build123d modelling, geometry verification and print-export validation for FDM 3D printing.",
+			"license": "MIT",
+			"keywords": ["cad", "3d-printing", "fdm", "fusion", "build123d"]
+		}
+	]
+}

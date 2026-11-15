@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    needs: ci
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          python-version: "3.12"
+      - name: Tag matches the project version
+        run: |
+          version="$(uv version --short)"
+          test "${GITHUB_REF_NAME#v}" = "$version" || { echo "::error::tag $GITHUB_REF_NAME != version $version"; exit 1; }
+      - name: Build the plugin archive
+        run: |
+          pkg="dist/cad-and-3d-printing-skills"
+          mkdir -p "$pkg"
+          cp -r .github/plugin.json .github/mcp.json .github/skills LICENSE README.md "$pkg/"
+          (cd dist && zip -qr "cad-and-3d-printing-skills-${GITHUB_REF_NAME}.zip" cad-and-3d-printing-skills)
+      - name: Release notes from CHANGELOG
+        run: |
+          awk -v v="${GITHUB_REF_NAME#v}" '$0 ~ "^## \\[" v "\\]" {f=1; next} /^## \[/ {f=0} f' CHANGELOG.md > notes.md
+          test -s notes.md || { echo "::error::CHANGELOG.md has no section for $GITHUB_REF_NAME"; exit 1; }
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/*.zip --notes-file notes.md --verify-tag

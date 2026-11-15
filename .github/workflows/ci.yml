@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  UV_LOCKED: "1"
+  FORCE_COLOR: "1"
+
+jobs:
+  lint:
+    name: Lint, types, repository invariants
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - run: uv sync
+      - run: uv run ruff format --check .
+      - run: uv run ruff check --output-format=github .
+      - run: uv run mypy
+      - run: uv run tools/validate_repo.py
+
+  test:
+    name: Tests (Python ${{ matrix.python }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Offscreen GL libraries for VTK
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libegl1 libxrender1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python }}
+      - run: uv sync
+      - run: uv run pytest --cov --cov-report=term-missing
+
+  scripts-standalone:
+    name: Skill scripts run standalone (PEP 723)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libegl1 libxrender1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - name: Each script resolves its own dependencies and starts
+        run: |
+          for script in .github/skills/*/scripts/*.py; do
+            echo "::group::$script"
+            uv run --no-project --script "$script" --help > /dev/null
+            echo "::endgroup::"
+          done
+
+  docs:
+    name: Docs (Mermaid diagrams, relative links)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Render every Mermaid diagram
+        run: |
+          echo '{"args": ["--no-sandbox"]}' > /tmp/puppeteer.json
+          for doc in README.md CONTRIBUTING.md; do
+            npx --yes @mermaid-js/mermaid-cli@11 -p /tmp/puppeteer.json -i "$doc" -o "/tmp/$(basename "$doc")"
+          done
+      - name: Relative links resolve
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: --offline --no-progress --include-fragments README.md CONTRIBUTING.md CHANGELOG.md '.github/**/*.md'
+          fail: true

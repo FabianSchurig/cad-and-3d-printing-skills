@@ -1,0 +1,28 @@
+# Allow-list: the repository root can also hold private CAD designs, models, scans and print
+# files. Only the shareable setup below is tracked; everything else stays local.
+/*
+!/.gitignore
+!/.gitattributes
+!/.python-version
+!/.pre-commit-config.yaml
+!/README.md
+!/CONTRIBUTING.md
+!/CHANGELOG.md
+!/LICENSE
+!/pyproject.toml
+!/uv.lock
+!/.github/
+!/.devcontainer/
+!/tools/
+!/tests/
+!/.vscode/
+/.vscode/*
+!/.vscode/mcp.json
+
+# Never track generated files inside allowed folders.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage*
