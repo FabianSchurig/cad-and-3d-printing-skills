@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/python:3.12
+FROM mcr.microsoft.com/devcontainers/python:3.15
 
 # GL/EGL libraries for offscreen VTK rendering and OpenCASCADE.
 RUN apt-get update \
